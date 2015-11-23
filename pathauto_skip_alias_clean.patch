@@ -1,0 +1,33 @@
+diff --git a/pathauto.admin.inc b/pathauto.admin.inc
+index b210386..3a6423e 100644
+--- a/pathauto.admin.inc
++++ b/pathauto.admin.inc
+@@ -100,6 +100,13 @@ function pathauto_settings_form($form) {
+     '#description' => t('Character used to separate words in titles. This will replace any spaces and punctuation characters. Using a space or + character can cause unexpected results.'),
+   );
+
++  $form['pathauto_skip'] = array(
++    '#type' => 'checkbox',
++    '#title' => t('Skip redundancy checks'),
++    '#default_value' => variable_get('pathauto_skip', FALSE),
++    '#description' => t('Skip replacing multiple separators with a single one in aliases. Useful during migrations, if old URL policy is different.'),
++  );
++
+   $form['pathauto_case'] = array(
+     '#type' => 'radios',
+     '#title' => t('Character case'),
+diff --git a/pathauto.inc b/pathauto.inc
+index 9699aa0..22231bb 100644
+--- a/pathauto.inc
++++ b/pathauto.inc
+@@ -273,7 +273,9 @@ function _pathauto_clean_separators($string, $separator = NULL) {
+     $seppattern = preg_quote($separator, '/');
+
+     // Replace multiple separators with a single one.
+-    $output = preg_replace("/$seppattern+/", $separator, $output);
++    // Replace multiple separators with a single one.
++    $skip = variable_get('pathauto_skip', FALSE);
++    ($skip) ?: $output = preg_replace("/$seppattern+/", $separator, $output);
+
+     // Replace trailing separators around slashes.
+     if ($separator !== '/') {
